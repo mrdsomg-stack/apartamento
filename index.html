@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestão do Apartamento</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1f2535;
+    --border: #2a3047;
+    --accent: #c8a96e;
+    --accent2: #e8c98e;
+    --text: #e8eaf0;
+    --muted: #8891a8;
+    --danger: #e07070;
+    --success: #6ec8a0;
+    --blue: #6e9ec8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 80% 60% at 10% 10%, rgba(200,169,110,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 90% 90%, rgba(110,158,200,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .header-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.4rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .header-left p {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .header-right {
+    text-align: right;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 2rem;
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 0.35rem;
+    border: 1px solid var(--border);
+    width: fit-content;
+  }
+  .tab-btn {
+    padding: 0.6rem 1.4rem;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    background: transparent;
+    color: var(--muted);
+  }
+  .tab-btn.active {
+    background: var(--surface2);
+    color: var(--accent);
+    border: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  /* Summary Cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .summary-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem 1.6rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .summary-card:hover { border-color: var(--accent); }
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+  .card-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+  .card-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.4rem;
+    color: var(--accent2);
+    font-weight: 500;
+  }
+  .card-sub {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  /* Section panel */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.6rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .panel-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    color: var(--accent);
+  }
+  .panel-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Add row form */
+  .add-row-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+    padding: 1.2rem 1.6rem;
+    background: rgba(200,169,110,0.03);
+    border-bottom: 1px solid var(--border);
+    align-items: end;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  .form-group label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .form-group input, .form-group select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.55rem 0.8rem;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .btn-add {
+    background: var(--accent);
+    color: #0f1117;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    align-self: flex-end;
+    white-space: nowrap;
+  }
+  .btn-add:hover { background: var(--accent2); transform: translateY(-1px); }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+  }
+  thead tr { background: var(--surface2); }
+  th {
+    padding: 0.7rem 1rem;
+    text-align: right;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+  th:first-child, th:nth-child(2), th:nth-child(3) { text-align: left; }
+  td {
+    padding: 0.65rem 1rem;
+    text-align: right;
+    border-bottom: 1px solid rgba(42,48,71,0.5);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  td:first-child { text-align: center; color: var(--muted); }
+  td:nth-child(2) { text-align: left; }
+  td:nth-child(3) { text-align: left; color: var(--muted); font-size: 0.78rem; }
+  tbody tr:hover { background: rgba(200,169,110,0.03); }
+  .diff-pos { color: var(--success); }
+  .diff-neg { color: var(--danger); }
+  .diff-zero { color: var(--muted); }
+  .saldo-atualizado { color: var(--accent2); font-weight: 500; }
+  .saldo-devedor { color: var(--blue); }
+  td.editable-cell {
+    cursor: pointer;
+    position: relative;
+  }
+  td.editable-cell:hover::after {
+    content: '✎';
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    color: var(--accent);
+    opacity: 0.7;
+  }
+  td.editable-cell input {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    width: 100%;
+    text-align: right;
+    padding: 0.1rem 0.3rem;
+  }
+  td.editable-cell input:focus { outline: none; }
+  .btn-delete {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.1rem 0.3rem;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .btn-delete:hover { color: var(--danger); background: rgba(224,112,112,0.1); }
+
+  /* Footer note */
+  .note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    padding: 0.8rem 1.6rem;
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+
+  /* Overview tab */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  .mini-table-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .mini-table-card .mini-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 1rem 1.2rem;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .mini-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .mini-header h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    color: var(--accent);
+  }
+  .mini-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 1.2rem;
+    border-bottom: 1px solid rgba(42,48,71,0.4);
+    font-size: 0.82rem;
+  }
+  .mini-row:last-child { border-bottom: none; }
+  .mini-row span:first-child { color: var(--muted); }
+  .mini-row span:last-child { font-family: 'DM Mono', monospace; color: var(--accent2); }
+
+  .hidden { display: none; }
+
+  @media (max-width: 768px) {
+    .header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .add-row-form { grid-template-columns: 1fr 1fr; }
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Gestão do Apartamento</h1>
+      <p>Controle de parcelas · INCC · Saldos</p>
+    </div>
+    <div class="header-right">
+      <div id="currentDate"></div>
+      <div style="margin-top:0.2rem; color: var(--accent); font-size:0.7rem;">ATUALIZADO AUTOMATICAMENTE</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="showTab('visao-geral')">Visão Geral</button>
+    <button class="tab-btn" onclick="showTab('entrada')">Entrada</button>
+    <button class="tab-btn" onclick="showTab('itbi')">ITBI / Cartório</button>
+    <button class="tab-btn" onclick="showTab('taxa')">Taxa Bancária</button>
+  </div>
+
+  <!-- VISÃO GERAL -->
+  <div id="tab-visao-geral">
+    <div class="summary-grid" id="summary-cards"></div>
+    <div class="overview-grid" id="overview-grid"></div>
+  </div>
+
+  <!-- ENTRADA -->
+  <div id="tab-entrada" class="hidden">
+    <div class="summary-grid" id="summary-entrada"></div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Entrada — Parcelas</span>
+        <span class="panel-meta" id="meta-entrada"></span>
+      </div>
+      <div class="add-row-form" id="form-entrada"></div>
+      <div class="table-wrap"><table id="table-entrada"><thead></thead><tbody></tbody></table></div>
+      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Parcela Atualizada</div>
+    </div>
+  </div>
+
+  <!-- ITBI -->
+  <div id="tab-itbi" class="hidden">
+    <div class="summary-grid" id="summary-itbi"></div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">ITBI / Cartório — Parcelas</span>
+        <span class="panel-meta" id="meta-itbi"></span>
+      </div>
+      <div class="add-row-form" id="form-itbi"></div>
+      <div class="table-wrap"><table id="table-itbi"><thead></thead><tbody></tbody></table></div>
+      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Parcela Atualizada</div>
+    </div>
+  </div>
+
+  <!-- TAXA -->
+  <div id="tab-taxa" class="hidden">
+    <div class="summary-grid" id="summary-taxa"></div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Taxa Bancária — Parcelas</span>
+        <span class="panel-meta" id="meta-taxa"></span>
+      </div>
+      <div class="add-row-form" id="form-taxa"></div>
+      <div class="table-wrap"><table id="table-taxa"><thead></thead><tbody></tbody></table></div>
+      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Parcela Atualizada</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA MODEL ───────────────────────────────────────────────────────────────
+const CONFIGS = {
+  entrada: { label: 'Entrada', total: 52181.28, parcelas: 72, color: '#c8a96e' },
+  itbi:    { label: 'ITBI / Cartório', total: 8520.00, parcelas: 48, color: '#6e9ec8' },
+  taxa:    { label: 'Taxa Bancária', total: 750.00, parcelas: 12, color: '#6ec8a0' },
+};
+
+const STORAGE_KEY = 'apt_gestao_v2';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return { entrada: [], itbi: [], taxa: [] };
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let data = loadData();
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+const fmt = (v) => 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtN = (v) => v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const pct = (v) => (v * 100).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%';
+
+function getVencimento(parcela) {
+  // First parcela starts at next month from now — but we use stored data
+  // vencimento based on parcel number; base: let user see as recorded
+  return null;
+}
+
+function computeRows(key) {
+  const cfg = CONFIGS[key];
+  const rows = data[key].sort((a,b) => a.num - b.num);
+  let saldoDevedor = cfg.total;
+  const result = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const parcelasRestantes = cfg.parcelas - row.num + 1;
+    // Saldo devedor atualizado pelo índice
+    const saldoAtualizado = saldoDevedor * (1 + (row.incc || 0));
+    const parcelaAtualizada = saldoAtualizado / parcelasRestantes;
+    const diferenca = (row.boleto || 0) - parcelaAtualizada;
+    const saldoDevedorAtualizado = saldoAtualizado - parcelaAtualizada;
+
+    result.push({
+      ...row,
+      saldoDevedor: saldoAtualizado,
+      parcelaAtualizada,
+      diferenca,
+      saldoDevedorAtualizado,
+    });
+
+    saldoDevedor = saldoDevedorAtualizado;
+  }
+  return { rows: result, saldoDevedorInicial: cfg.total };
+}
+
+// ─── TABLE HEADERS ────────────────────────────────────────────────────────────
+function buildHeaders(tableEl) {
+  const thead = tableEl.querySelector('thead');
+  thead.innerHTML = `<tr>
+    <th>Nº</th>
+    <th>Vencimento</th>
+    <th>Mês Índice</th>
+    <th>Valor Parcela</th>
+    <th>Índice INCC</th>
+    <th>Parcela Atualizada</th>
+    <th>Boleto</th>
+    <th>Diferença</th>
+    <th>Saldo Devedor</th>
+    <th>Saldo Devedor Atualizado</th>
+    <th></th>
+  </tr>`;
+}
+
+// ─── RENDER TABLE ─────────────────────────────────────────────────────────────
+function renderTable(key) {
+  const cfg = CONFIGS[key];
+  const tableEl = document.getElementById('table-' + key);
+  buildHeaders(tableEl);
+  const tbody = tableEl.querySelector('tbody');
+  tbody.innerHTML = '';
+
+  // Initial row
+  const initRow = document.createElement('tr');
+  initRow.style.background = 'rgba(200,169,110,0.05)';
+  initRow.innerHTML = `
+    <td style="color:var(--muted);font-size:0.75rem;">—</td>
+    <td style="text-align:left;color:var(--muted);font-size:0.75rem;">Saldo Inicial</td>
+    <td>—</td>
+    <td style="text-align:right;">—</td>
+    <td style="text-align:right;">—</td>
+    <td style="text-align:right;">—</td>
+    <td style="text-align:right;">—</td>
+    <td style="text-align:right;">—</td>
+    <td class="saldo-devedor" style="text-align:right;">${fmt(cfg.total)}</td>
+    <td class="saldo-atualizado" style="text-align:right;">${fmt(cfg.total)}</td>
+    <td></td>
+  `;
+  tbody.appendChild(initRow);
+
+  const { rows } = computeRows(key);
+
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    const diffClass = row.diferenca > 0.005 ? 'diff-pos' : row.diferenca < -0.005 ? 'diff-neg' : 'diff-zero';
+    const diffSign = row.diferenca >= 0 ? '' : '-';
+
+    tr.innerHTML = `
+      <td>${row.num}</td>
+      <td style="text-align:left;">${row.vencimento}</td>
+      <td style="text-align:left;color:var(--muted);">${row.mesIndice || '—'}</td>
+      <td>${fmt(row.valorParcela)}</td>
+      <td>${row.incc ? pct(row.incc) : '—'}</td>
+      <td class="editable-cell" data-key="${key}" data-id="${row.id}" data-field="parcelaAtualizada">${fmt(row.parcelaAtualizada)}</td>
+      <td class="editable-cell" data-key="${key}" data-id="${row.id}" data-field="boleto">${row.boleto !== undefined ? fmt(row.boleto) : '—'}</td>
+      <td class="${diffClass}">${row.boleto !== undefined ? (diffSign + fmt(row.diferenca)) : '—'}</td>
+      <td class="saldo-devedor">${fmt(row.saldoDevedor)}</td>
+      <td class="saldo-atualizado">${fmt(row.saldoDevedorAtualizado)}</td>
+      <td><button class="btn-delete" onclick="deleteRow('${key}', '${row.id}')">✕</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // Meta
+  document.getElementById('meta-' + key).textContent =
+    `${rows.length} parcelas lançadas de ${cfg.parcelas} · Restam ${cfg.parcelas - rows.length}`;
+
+  // Summary cards
+  renderSummary(key, rows);
+}
+
+// ─── EDITABLE BOLETO CELL ─────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+  const cell = e.target.closest('.editable-cell[data-field="boleto"]');
+  if (!cell || cell.querySelector('input')) return;
+  const key = cell.dataset.key, id = cell.dataset.id;
+  const row = data[key].find(r => r.id === id);
+  const currentVal = row.boleto !== undefined ? row.boleto.toFixed(2) : '';
+  cell.innerHTML = `<input type="number" step="0.01" value="${currentVal}" placeholder="0,00">`;
+  const inp = cell.querySelector('input');
+  inp.focus();
+  inp.select();
+  const commit = () => {
+    const val = parseFloat(inp.value.replace(',','.'));
+    if (!isNaN(val)) row.boleto = val;
+    else delete row.boleto;
+    saveData(data);
+    renderAll(key);
+  };
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') { renderAll(key); } });
+});
+
+// ─── SUMMARY ──────────────────────────────────────────────────────────────────
+function renderSummary(key, rows) {
+  const cfg = CONFIGS[key];
+  const el = document.getElementById('summary-' + key);
+  const lastRow = rows[rows.length - 1];
+  const saldoAtual = lastRow ? lastRow.saldoDevedorAtualizado : cfg.total;
+  const pago = rows.length;
+  const restam = cfg.parcelas - pago;
+
+  el.innerHTML = `
+    <div class="summary-card">
+      <div class="card-label">Saldo Devedor Atual</div>
+      <div class="card-value">${fmt(saldoAtual)}</div>
+      <div class="card-sub">Após ${pago} parcelas pagas</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Parcelas Restantes</div>
+      <div class="card-value" style="color:var(--blue);">${restam}x</div>
+      <div class="card-sub">de ${cfg.parcelas} total</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Valor Original</div>
+      <div class="card-value" style="color:var(--muted);font-size:1.1rem;">${fmt(cfg.total)}</div>
+      <div class="card-sub">sem correção</div>
+    </div>
+    ${lastRow ? `
+    <div class="summary-card">
+      <div class="card-label">Última Parcela Atualizada</div>
+      <div class="card-value" style="font-size:1.1rem;">${fmt(lastRow.parcelaAtualizada)}</div>
+      <div class="card-sub">Parc. ${lastRow.num} · ${lastRow.vencimento}</div>
+    </div>` : ''}
+  `;
+}
+
+// ─── ADD ROW FORM ─────────────────────────────────────────────────────────────
+const MESES = ['Jan.','Fev.','Mar.','Abr.','Mai.','Jun.','Jul.','Ago.','Set.','Out.','Nov.','Dez.'];
+const ANOS = ['2025','2026','2027','2028','2029','2030'];
+
+function buildForm(key) {
+  const cfg = CONFIGS[key];
+  const el = document.getElementById('form-' + key);
+  
+  const mesesOptions = ANOS.flatMap(a => MESES.map(m => `<option>${m} ${a}</option>`)).join('');
+
+  el.innerHTML = `
+    <div class="form-group">
+      <label>Nº Parcela</label>
+      <input type="number" id="fn-${key}" min="1" max="${cfg.parcelas}" placeholder="1">
+    </div>
+    <div class="form-group">
+      <label>Mês Índice INCC</label>
+      <select id="fmi-${key}"><option value="">Selecione</option>${mesesOptions}</select>
+    </div>
+    <div class="form-group">
+      <label>Índice INCC (%)</label>
+      <input type="number" id="fi-${key}" step="0.01" placeholder="0,21">
+    </div>
+    <div class="form-group">
+      <label>Boleto (R$)</label>
+      <input type="number" id="fb-${key}" step="0.01" placeholder="opcional">
+    </div>
+    <button class="btn-add" onclick="addRow('${key}')">+ Adicionar Parcela</button>
+  `;
+}
+
+function getVencimentoStr(num) {
+  // parcela 1 = 10/02/2026 (as per the example), incremented monthly
+  const base = new Date(2026, 1, 10); // Feb 10 2026
+  base.setMonth(base.getMonth() + (num - 1));
+  const d = String(base.getDate()).padStart(2,'0');
+  const m = String(base.getMonth()+1).padStart(2,'0');
+  const y = base.getFullYear();
+  return `${d}/${m}/${y}`;
+}
+
+function addRow(key) {
+  const cfg = CONFIGS[key];
+  const num = parseInt(document.getElementById('fn-' + key).value);
+  const mesIndice = document.getElementById('fmi-' + key).value;
+  const inccPct = parseFloat(document.getElementById('fi-' + key).value);
+  const boletoVal = document.getElementById('fb-' + key).value;
+
+  if (!num || num < 1 || num > cfg.parcelas) { alert('Informe um número de parcela válido (1–' + cfg.parcelas + ')'); return; }
+  if (data[key].find(r => r.num === num)) { alert('Parcela ' + num + ' já cadastrada!'); return; }
+
+  // valorParcela = saldo original / parcelas total (sem correção, base)
+  const valorParcela = cfg.total / cfg.parcelas;
+
+  const row = {
+    id: Date.now().toString(),
+    num,
+    vencimento: getVencimentoStr(num),
+    mesIndice: mesIndice || '',
+    incc: isNaN(inccPct) ? 0 : inccPct / 100,
+    valorParcela,
+  };
+  if (boletoVal) row.boleto = parseFloat(boletoVal);
+
+  data[key].push(row);
+  saveData(data);
+  renderAll(key);
+
+  // Clear
+  document.getElementById('fn-' + key).value = '';
+  document.getElementById('fmi-' + key).value = '';
+  document.getElementById('fi-' + key).value = '';
+  document.getElementById('fb-' + key).value = '';
+}
+
+function deleteRow(key, id) {
+  if (!confirm('Remover esta parcela?')) return;
+  data[key] = data[key].filter(r => r.id !== id);
+  saveData(data);
+  renderAll(key);
+}
+
+// ─── VISÃO GERAL ──────────────────────────────────────────────────────────────
+function renderOverview() {
+  // Summary cards
+  const el = document.getElementById('summary-cards');
+  let totalDevedor = 0;
+  let totalPago = 0;
+
+  Object.keys(CONFIGS).forEach(key => {
+    const cfg = CONFIGS[key];
+    const { rows } = computeRows(key);
+    const last = rows[rows.length - 1];
+    const saldo = last ? last.saldoDevedorAtualizado : cfg.total;
+    totalDevedor += saldo;
+    rows.forEach(r => { if (r.boleto) totalPago += r.boleto; });
+  });
+
+  el.innerHTML = `
+    <div class="summary-card" style="border-color:var(--accent);">
+      <div class="card-label">Saldo Total Devedor</div>
+      <div class="card-value">${fmt(totalDevedor)}</div>
+      <div class="card-sub">Todas as modalidades</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Total Pago (Boletos)</div>
+      <div class="card-value" style="color:var(--success);">${fmt(totalPago)}</div>
+      <div class="card-sub">Soma de boletos lançados</div>
+    </div>
+    <div class="summary-card">
+      <div class="card-label">Valor Total do Imóvel</div>
+      <div class="card-value" style="color:var(--muted);font-size:1.1rem;">${fmt(52181.28 + 8520 + 750)}</div>
+      <div class="card-sub">Entrada + ITBI + Taxa</div>
+    </div>
+  `;
+
+  // Mini cards per category
+  const og = document.getElementById('overview-grid');
+  og.innerHTML = '';
+
+  Object.keys(CONFIGS).forEach(key => {
+    const cfg = CONFIGS[key];
+    const { rows } = computeRows(key);
+    const last = rows[rows.length - 1];
+    const saldo = last ? last.saldoDevedorAtualizado : cfg.total;
+    const pago = rows.length;
+    const restam = cfg.parcelas - pago;
+    const ultimaParc = last ? fmt(last.parcelaAtualizada) : '—';
+
+    const card = document.createElement('div');
+    card.className = 'mini-table-card';
+    card.innerHTML = `
+      <div class="mini-header">
+        <div class="mini-dot" style="background:${cfg.color}"></div>
+        <h3>${cfg.label}</h3>
+      </div>
+      <div class="mini-row"><span>Saldo Devedor</span><span>${fmt(saldo)}</span></div>
+      <div class="mini-row"><span>Parcelas Pagas</span><span>${pago} de ${cfg.parcelas}</span></div>
+      <div class="mini-row"><span>Parcelas Restantes</span><span>${restam}x</span></div>
+      <div class="mini-row"><span>Última Parcela Atualizada</span><span>${ultimaParc}</span></div>
+      <div class="mini-row"><span>Valor Original</span><span>${fmt(cfg.total)}</span></div>
+    `;
+    og.appendChild(card);
+  });
+}
+
+// ─── TABS ────────────────────────────────────────────────────────────────────
+function showTab(name) {
+  ['visao-geral','entrada','itbi','taxa'].forEach(t => {
+    document.getElementById('tab-' + t).classList.add('hidden');
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.remove('hidden');
+  event.target.classList.add('active');
+  if (name === 'visao-geral') renderOverview();
+}
+
+function renderAll(key) {
+  renderTable(key);
+  renderOverview();
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
+  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+});
+
+['entrada','itbi','taxa'].forEach(key => {
+  buildForm(key);
+  renderTable(key);
+});
+renderOverview();
+</script>
+</body>
+</html>
