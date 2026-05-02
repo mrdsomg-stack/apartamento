@@ -395,7 +395,7 @@
       </div>
       <div class="add-row-form" id="form-entrada"></div>
       <div class="table-wrap"><table id="table-entrada"><thead></thead><tbody></tbody></table></div>
-      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Parcela Atualizada</div>
+      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Boleto Canopus (valor efetivamente pago)</div>
     </div>
   </div>
 
@@ -409,7 +409,7 @@
       </div>
       <div class="add-row-form" id="form-itbi"></div>
       <div class="table-wrap"><table id="table-itbi"><thead></thead><tbody></tbody></table></div>
-      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Parcela Atualizada</div>
+      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Boleto Canopus (valor efetivamente pago)</div>
     </div>
   </div>
 
@@ -423,7 +423,7 @@
       </div>
       <div class="add-row-form" id="form-taxa"></div>
       <div class="table-wrap"><table id="table-taxa"><thead></thead><tbody></tbody></table></div>
-      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Parcela Atualizada</div>
+      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Boleto Canopus (valor efetivamente pago)</div>
     </div>
   </div>
 
@@ -477,7 +477,10 @@ function computeRows(key) {
     const saldoAtualizado = saldoDevedor * (1 + (row.incc || 0));
     const parcelaAtualizada = saldoAtualizado / parcelasRestantes;
     const diferenca = (row.boleto || 0) - parcelaAtualizada;
-    const saldoDevedorAtualizado = saldoAtualizado - parcelaAtualizada;
+    // Saldo Devedor Atualizado = Saldo Devedor − Boleto pago (valor efetivamente pago)
+    const saldoDevedorAtualizado = row.boleto !== undefined
+      ? saldoAtualizado - row.boleto
+      : saldoAtualizado - parcelaAtualizada; // fallback se boleto não informado
 
     result.push({
       ...row,
