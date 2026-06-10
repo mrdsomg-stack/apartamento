@@ -4,799 +4,556 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestão do Apartamento</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0f1117;
-    --surface: #181c27;
-    --surface2: #1f2535;
-    --border: #2a3047;
-    --accent: #c8a96e;
-    --accent2: #e8c98e;
-    --text: #e8eaf0;
-    --muted: #8891a8;
-    --danger: #e07070;
-    --success: #6ec8a0;
-    --blue: #6e9ec8;
+    --bg:#0f1117;--surface:#181c27;--surface2:#1f2535;--border:#2a3047;
+    --accent:#c8a96e;--accent2:#e8c98e;--text:#e8eaf0;--muted:#8891a8;
+    --danger:#e07070;--success:#6ec8a0;--blue:#6e9ec8;
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-  }
-
-  /* Background texture */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: 
-      radial-gradient(ellipse 80% 60% at 10% 10%, rgba(200,169,110,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 80% at 90% 90%, rgba(110,158,200,0.05) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .app { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
-
-  /* Header */
-  .header {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    margin-bottom: 3rem;
-    padding-bottom: 2rem;
-    border-bottom: 1px solid var(--border);
-  }
-  .header-left h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 2.4rem;
-    color: var(--accent);
-    line-height: 1;
-  }
-  .header-left p {
-    color: var(--muted);
-    font-size: 0.85rem;
-    margin-top: 0.4rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .header-right {
-    text-align: right;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-
-  /* Tabs */
-  .tabs {
-    display: flex;
-    gap: 0.25rem;
-    margin-bottom: 2rem;
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 0.35rem;
-    border: 1px solid var(--border);
-    width: fit-content;
-  }
-  .tab-btn {
-    padding: 0.6rem 1.4rem;
-    border: none;
-    border-radius: 9px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 500;
-    transition: all 0.2s;
-    background: transparent;
-    color: var(--muted);
-  }
-  .tab-btn.active {
-    background: var(--surface2);
-    color: var(--accent);
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
-  .tab-btn:hover:not(.active) { color: var(--text); }
-
-  /* Summary Cards */
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-  .summary-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.4rem 1.6rem;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .summary-card:hover { border-color: var(--accent); }
-  .summary-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), transparent);
-  }
-  .card-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    margin-bottom: 0.6rem;
-  }
-  .card-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 1.4rem;
-    color: var(--accent2);
-    font-weight: 500;
-  }
-  .card-sub {
-    font-size: 0.78rem;
-    color: var(--muted);
-    margin-top: 0.3rem;
-  }
-
-  /* Section panel */
-  .panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-  }
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.2rem 1.6rem;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface2);
-  }
-  .panel-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.1rem;
-    color: var(--accent);
-  }
-  .panel-meta {
-    font-size: 0.78rem;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-  }
-
-  /* Add row form */
-  .add-row-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 0.75rem;
-    padding: 1.2rem 1.6rem;
-    background: rgba(200,169,110,0.03);
-    border-bottom: 1px solid var(--border);
-    align-items: end;
-  }
-  .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
-  .form-group label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-  }
-  .form-group input, .form-group select {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.55rem 0.8rem;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    transition: border-color 0.2s;
-    width: 100%;
-  }
-  .form-group input:focus, .form-group select:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  .btn-add {
-    background: var(--accent);
-    color: #0f1117;
-    border: none;
-    border-radius: 8px;
-    padding: 0.55rem 1.2rem;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    align-self: flex-end;
-    white-space: nowrap;
-  }
-  .btn-add:hover { background: var(--accent2); transform: translateY(-1px); }
-
-  /* Table */
-  .table-wrap { overflow-x: auto; }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.83rem;
-  }
-  thead tr { background: var(--surface2); }
-  th {
-    padding: 0.7rem 1rem;
-    text-align: right;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--muted);
-    font-weight: 500;
-    white-space: nowrap;
-    border-bottom: 1px solid var(--border);
-  }
-  th:first-child, th:nth-child(2), th:nth-child(3) { text-align: left; }
-  td {
-    padding: 0.65rem 1rem;
-    text-align: right;
-    border-bottom: 1px solid rgba(42,48,71,0.5);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.82rem;
-    color: var(--text);
-    white-space: nowrap;
-  }
-  td:first-child { text-align: center; color: var(--muted); }
-  td:nth-child(2) { text-align: left; }
-  td:nth-child(3) { text-align: left; color: var(--muted); font-size: 0.78rem; }
-  tbody tr:hover { background: rgba(200,169,110,0.03); }
-  .diff-pos { color: var(--success); }
-  .diff-neg { color: var(--danger); }
-  .diff-zero { color: var(--muted); }
-  .saldo-atualizado { color: var(--accent2); font-weight: 500; }
-  .saldo-devedor { color: var(--blue); }
-  td.editable-cell {
-    cursor: pointer;
-    position: relative;
-  }
-  td.editable-cell:hover::after {
-    content: '✎';
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.7rem;
-    color: var(--accent);
-    opacity: 0.7;
-  }
-  td.editable-cell input {
-    background: var(--surface2);
-    border: 1px solid var(--accent);
-    border-radius: 4px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.82rem;
-    width: 100%;
-    text-align: right;
-    padding: 0.1rem 0.3rem;
-  }
-  td.editable-cell input:focus { outline: none; }
-  .btn-delete {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0.1rem 0.3rem;
-    border-radius: 4px;
-    transition: all 0.15s;
-  }
-  .btn-delete:hover { color: var(--danger); background: rgba(224,112,112,0.1); }
-
-  /* Footer note */
-  .note {
-    font-size: 0.75rem;
-    color: var(--muted);
-    padding: 0.8rem 1.6rem;
-    border-top: 1px solid var(--border);
-    font-style: italic;
-  }
-
-  /* Overview tab */
-  .overview-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
-  .mini-table-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-  }
-  .mini-table-card .mini-header {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 1rem 1.2rem;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-  }
-  .mini-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-  }
-  .mini-header h3 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1rem;
-    color: var(--accent);
-  }
-  .mini-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.65rem 1.2rem;
-    border-bottom: 1px solid rgba(42,48,71,0.4);
-    font-size: 0.82rem;
-  }
-  .mini-row:last-child { border-bottom: none; }
-  .mini-row span:first-child { color: var(--muted); }
-  .mini-row span:last-child { font-family: 'DM Mono', monospace; color: var(--accent2); }
-
-  .hidden { display: none; }
-
-  @media (max-width: 768px) {
-    .header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-    .add-row-form { grid-template-columns: 1fr 1fr; }
-    .summary-grid { grid-template-columns: 1fr 1fr; }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 10% 10%,rgba(200,169,110,.06) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 90% 90%,rgba(110,158,200,.05) 0%,transparent 60%);pointer-events:none;z-index:0;}
+  .app{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:2rem 1.5rem;}
+  .header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border);}
+  .header-left h1{font-family:'DM Serif Display',serif;font-size:2.4rem;color:var(--accent);line-height:1;}
+  .header-left p{color:var(--muted);font-size:.85rem;margin-top:.4rem;letter-spacing:.08em;text-transform:uppercase;}
+  .header-right{text-align:right;font-family:'DM Mono',monospace;font-size:.8rem;color:var(--muted);}
+  .header-right span{display:block;margin-top:.2rem;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;}
+  .tabs{display:flex;gap:.25rem;margin-bottom:2rem;background:var(--surface);border-radius:12px;padding:.35rem;border:1px solid var(--border);width:fit-content;}
+  .tab-btn{padding:.6rem 1.4rem;border:none;border-radius:9px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;transition:all .2s;background:transparent;color:var(--muted);}
+  .tab-btn.active{background:var(--surface2);color:var(--accent);border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+  .tab-btn:hover:not(.active){color:var(--text);}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:2rem;}
+  .summary-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.4rem 1.6rem;position:relative;overflow:hidden;transition:border-color .2s;}
+  .summary-card:hover{border-color:var(--accent);}
+  .summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent);}
+  .card-label{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.6rem;}
+  .card-value{font-family:'DM Mono',monospace;font-size:1.5rem;color:var(--accent2);font-weight:500;}
+  .card-sub{font-size:.75rem;color:var(--muted);margin-top:.3rem;}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:1.5rem;}
+  .panel-header{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.6rem;border-bottom:1px solid var(--border);background:var(--surface2);}
+  .panel-title{font-family:'DM Serif Display',serif;font-size:1.1rem;color:var(--accent);}
+  .panel-meta{font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace;}
+  .add-row-form{display:grid;grid-template-columns:80px 160px 130px 150px 1fr;gap:.75rem;padding:1.2rem 1.6rem;background:rgba(200,169,110,.03);border-bottom:1px solid var(--border);align-items:end;}
+  .form-group{display:flex;flex-direction:column;gap:.35rem;}
+  .form-group label{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+  .form-group input,.form-group select{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:.55rem .8rem;color:var(--text);font-family:'DM Mono',monospace;font-size:.85rem;transition:border-color .2s;width:100%;}
+  .form-group input:focus,.form-group select:focus{outline:none;border-color:var(--accent);}
+  .btn-add{background:var(--accent);color:#0f1117;border:none;border-radius:8px;padding:.55rem 1.2rem;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;align-self:flex-end;white-space:nowrap;}
+  .btn-add:hover{background:var(--accent2);transform:translateY(-1px);}
+  .table-wrap{overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;font-size:.83rem;}
+  thead tr{background:var(--surface2);}
+  th{padding:.7rem 1rem;text-align:right;font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:500;white-space:nowrap;border-bottom:1px solid var(--border);}
+  th:first-child,th:nth-child(2),th:nth-child(3){text-align:left;}
+  td{padding:.65rem 1rem;text-align:right;border-bottom:1px solid rgba(42,48,71,.5);font-family:'DM Mono',monospace;font-size:.82rem;color:var(--text);white-space:nowrap;}
+  td:first-child{text-align:center;color:var(--muted);}
+  td:nth-child(2){text-align:left;}
+  td:nth-child(3){text-align:left;color:var(--muted);font-size:.78rem;}
+  tbody tr:hover{background:rgba(200,169,110,.03);}
+  tfoot td{padding:.8rem 1rem;border-top:1px solid var(--border);border-bottom:none;background:var(--surface2);font-weight:600;}
+  tfoot td:first-child{text-align:left;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;}
+  .diff-pos{color:var(--success);}
+  .diff-neg{color:var(--danger);}
+  .diff-zero{color:var(--muted);}
+  .saldo-atualizado{color:var(--accent2);font-weight:500;}
+  .saldo-devedor{color:var(--blue);}
+  .est-tag{color:var(--accent);opacity:.6;font-size:.7rem;}
+  td.editable-cell{cursor:pointer;position:relative;}
+  td.editable-cell:hover::after{content:'✎';position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:.7rem;color:var(--accent);opacity:.7;}
+  td.editable-cell input{background:var(--surface2);border:1px solid var(--accent);border-radius:4px;color:var(--text);font-family:'DM Mono',monospace;font-size:.82rem;width:110px;text-align:right;padding:.1rem .3rem;}
+  td.editable-cell input:focus{outline:none;}
+  .btn-delete{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.9rem;padding:.1rem .3rem;border-radius:4px;transition:all .15s;}
+  .btn-delete:hover{color:var(--danger);background:rgba(224,112,112,.1);}
+  .note{font-size:.73rem;color:var(--muted);padding:.8rem 1.6rem;border-top:1px solid var(--border);font-style:italic;}
+  .overview-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;}
+  .mini-table-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+  .mini-header{display:flex;align-items:center;gap:.6rem;padding:1rem 1.2rem;background:var(--surface2);border-bottom:1px solid var(--border);}
+  .mini-dot{width:8px;height:8px;border-radius:50%;}
+  .mini-header h3{font-family:'DM Serif Display',serif;font-size:1rem;color:var(--accent);}
+  .mini-row{display:flex;justify-content:space-between;align-items:center;padding:.65rem 1.2rem;border-bottom:1px solid rgba(42,48,71,.4);font-size:.82rem;}
+  .mini-row:last-child{border-bottom:none;}
+  .mini-row span:first-child{color:var(--muted);}
+  .mini-row span:last-child{font-family:'DM Mono',monospace;color:var(--accent2);}
+  .incc-config-panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:1.5rem;}
+  .incc-config-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:.6rem;padding:1.2rem 1.6rem;}
+  .incc-field{display:flex;flex-direction:column;gap:.3rem;}
+  .incc-field label{font-size:.68rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);}
+  .incc-field input{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.45rem .6rem;color:var(--success);font-family:'DM Mono',monospace;font-size:.85rem;width:100%;transition:border-color .2s;}
+  .incc-field input:focus{outline:none;border-color:var(--accent);}
+  .incc-field.est input{color:var(--accent);border-style:dashed;}
+  .hidden{display:none;}
+  @media(max-width:900px){
+    .header{flex-direction:column;align-items:flex-start;gap:1rem;}
+    .summary-grid{grid-template-columns:1fr 1fr;}
+    .add-row-form{grid-template-columns:1fr 1fr;}
   }
 </style>
 </head>
 <body>
 <div class="app">
-
-  <!-- Header -->
-  <div class="header">
+  <header class="header">
     <div class="header-left">
       <h1>Gestão do Apartamento</h1>
-      <p>Controle de parcelas · INCC · Saldos</p>
+      <p>Controle de Parcelas · INCC · Saldos</p>
     </div>
     <div class="header-right">
-      <div id="currentDate"></div>
-      <div style="margin-top:0.2rem; color: var(--accent); font-size:0.7rem;">ATUALIZADO AUTOMATICAMENTE</div>
+      <span id="dataHoje"></span>
+      <span>Atualizado automaticamente</span>
     </div>
-  </div>
+  </header>
 
-  <!-- Tabs -->
   <div class="tabs">
-    <button class="tab-btn active" onclick="showTab('visao-geral')">Visão Geral</button>
+    <button class="tab-btn active" onclick="showTab('visao')">Visão Geral</button>
     <button class="tab-btn" onclick="showTab('entrada')">Entrada</button>
     <button class="tab-btn" onclick="showTab('itbi')">ITBI / Cartório</button>
     <button class="tab-btn" onclick="showTab('taxa')">Taxa Bancária</button>
+    <button class="tab-btn" onclick="showTab('incc')">⚙ Configurações</button>
   </div>
 
   <!-- VISÃO GERAL -->
-  <div id="tab-visao-geral">
-    <div class="summary-grid" id="summary-cards"></div>
-    <div class="overview-grid" id="overview-grid"></div>
+  <div id="tab-visao">
+    <div class="summary-grid" id="overview-cards"></div>
+    <div class="overview-grid" id="overview-mini"></div>
   </div>
 
   <!-- ENTRADA -->
   <div id="tab-entrada" class="hidden">
-    <div class="summary-grid" id="summary-entrada"></div>
+    <div class="summary-grid" id="cards-entrada"></div>
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Entrada — Parcelas</span>
         <span class="panel-meta" id="meta-entrada"></span>
       </div>
-      <div class="add-row-form" id="form-entrada"></div>
-      <div class="table-wrap"><table id="table-entrada"><thead></thead><tbody></tbody></table></div>
-      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Boleto Canopus (valor efetivamente pago)</div>
+      <div class="add-row-form">
+        <div class="form-group"><label>Nº Parc.</label><input type="number" id="ent-num" min="1" placeholder="auto"></div>
+        <div class="form-group"><label>Mês Índice INCC</label><select id="ent-mes"></select></div>
+        <div class="form-group"><label>Índice INCC (%)</label><input type="number" id="ent-incc" step="0.01" readonly style="opacity:.7;cursor:default;"></div>
+        <div class="form-group"><label>Boleto (R$)</label><input type="number" id="ent-boleto" step="0.01" placeholder="opcional"></div>
+        <button class="btn-add" onclick="addParcela('entrada')">+ Adicionar Parcela</button>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Nº</th><th>Vencimento</th><th>Mês Índice</th><th>Valor Parcela</th><th>Índice INCC</th><th>Parcela Atualizada</th><th>Boleto (R$)</th><th>Diferença</th><th>Saldo Devedor</th><th>Saldo Dev. Atualiz.</th><th></th></tr></thead>
+        <tbody id="tbody-entrada"></tbody>
+        <tfoot><tr id="tfoot-entrada"><td colspan="11"></td></tr></tfoot>
+      </table></div>
+      <div class="note">★ Estimativa — índice ainda não divulgado pela FGV. Atualize em ⚙ Configurações.</div>
     </div>
   </div>
 
   <!-- ITBI -->
   <div id="tab-itbi" class="hidden">
-    <div class="summary-grid" id="summary-itbi"></div>
+    <div class="summary-grid" id="cards-itbi"></div>
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">ITBI / Cartório — Parcelas</span>
         <span class="panel-meta" id="meta-itbi"></span>
       </div>
-      <div class="add-row-form" id="form-itbi"></div>
-      <div class="table-wrap"><table id="table-itbi"><thead></thead><tbody></tbody></table></div>
-      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Boleto Canopus (valor efetivamente pago)</div>
+      <div class="add-row-form">
+        <div class="form-group"><label>Nº Parc.</label><input type="number" id="itbi-num" min="1" placeholder="auto"></div>
+        <div class="form-group"><label>Mês Índice INCC</label><select id="itbi-mes"></select></div>
+        <div class="form-group"><label>Índice INCC (%)</label><input type="number" id="itbi-incc" step="0.01" readonly style="opacity:.7;cursor:default;"></div>
+        <div class="form-group"><label>Boleto (R$)</label><input type="number" id="itbi-boleto" step="0.01" placeholder="opcional"></div>
+        <button class="btn-add" onclick="addParcela('itbi')">+ Adicionar Parcela</button>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Nº</th><th>Vencimento</th><th>Mês Índice</th><th>Valor Parcela</th><th>Índice INCC</th><th>Parcela Atualizada</th><th>Boleto (R$)</th><th>Diferença</th><th>Saldo Devedor</th><th>Saldo Dev. Atualiz.</th><th></th></tr></thead>
+        <tbody id="tbody-itbi"></tbody>
+        <tfoot><tr id="tfoot-itbi"><td colspan="11"></td></tr></tfoot>
+      </table></div>
+      <div class="note">★ Estimativa — índice ainda não divulgado pela FGV.</div>
     </div>
   </div>
 
   <!-- TAXA -->
   <div id="tab-taxa" class="hidden">
-    <div class="summary-grid" id="summary-taxa"></div>
+    <div class="summary-grid" id="cards-taxa"></div>
     <div class="panel">
       <div class="panel-header">
         <span class="panel-title">Taxa Bancária — Parcelas</span>
         <span class="panel-meta" id="meta-taxa"></span>
       </div>
-      <div class="add-row-form" id="form-taxa"></div>
-      <div class="table-wrap"><table id="table-taxa"><thead></thead><tbody></tbody></table></div>
-      <div class="note">* Parcela Atualizada = Saldo Devedor ÷ parcelas restantes · Saldo Devedor Atualizado = Saldo Devedor − Boleto Canopus (valor efetivamente pago)</div>
+      <div class="add-row-form">
+        <div class="form-group"><label>Nº Parc.</label><input type="number" id="taxa-num" min="1" placeholder="auto"></div>
+        <div class="form-group"><label>Mês Índice INCC</label><select id="taxa-mes"></select></div>
+        <div class="form-group"><label>Índice INCC (%)</label><input type="number" id="taxa-incc" step="0.01" readonly style="opacity:.7;cursor:default;"></div>
+        <div class="form-group"><label>Boleto (R$)</label><input type="number" id="taxa-boleto" step="0.01" placeholder="opcional"></div>
+        <button class="btn-add" onclick="addParcela('taxa')">+ Adicionar Parcela</button>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Nº</th><th>Vencimento</th><th>Mês Índice</th><th>Valor Parcela</th><th>Índice INCC</th><th>Parcela Atualizada</th><th>Boleto (R$)</th><th>Diferença</th><th>Saldo Devedor</th><th>Saldo Dev. Atualiz.</th><th></th></tr></thead>
+        <tbody id="tbody-taxa"></tbody>
+        <tfoot><tr id="tfoot-taxa"><td colspan="11"></td></tr></tfoot>
+      </table></div>
+      <div class="note">★ Estimativa — índice ainda não divulgado pela FGV.</div>
+    </div>
+  </div>
+
+  <!-- CONFIGURAÇÕES -->
+  <div id="tab-incc" class="hidden">
+    <div class="incc-config-panel">
+      <div class="panel-header"><span class="panel-title">Configuração das Modalidades</span></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;padding:1.5rem 1.6rem;">
+        <div>
+          <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.8rem;">Entrada</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;">
+            <div class="form-group"><label>Valor Total (R$)</label><input type="number" id="cfg-ent-valor" step="0.01" oninput="saveConfig()"></div>
+            <div class="form-group"><label>Nº Parcelas</label><input type="number" id="cfg-ent-n" min="1" oninput="saveConfig()"></div>
+            <div class="form-group"><label>1ª Parcela</label><input type="month" id="cfg-ent-first" oninput="saveConfig()"></div>
+            <div class="form-group"><label>Mês-base INCC</label><input type="month" id="cfg-ent-base" oninput="saveConfig()"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.8rem;">ITBI / Cartório</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;">
+            <div class="form-group"><label>Valor Total (R$)</label><input type="number" id="cfg-itbi-valor" step="0.01" oninput="saveConfig()"></div>
+            <div class="form-group"><label>Nº Parcelas</label><input type="number" id="cfg-itbi-n" min="1" oninput="saveConfig()"></div>
+            <div class="form-group"><label>1ª Parcela</label><input type="month" id="cfg-itbi-first" oninput="saveConfig()"></div>
+            <div class="form-group"><label>Mês-base INCC</label><input type="month" id="cfg-itbi-base" oninput="saveConfig()"></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.8rem;">Taxa Bancária</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;">
+            <div class="form-group"><label>Valor Total (R$)</label><input type="number" id="cfg-taxa-valor" step="0.01" oninput="saveConfig()"></div>
+            <div class="form-group"><label>Nº Parcelas</label><input type="number" id="cfg-taxa-n" min="1" oninput="saveConfig()"></div>
+            <div class="form-group"><label>1ª Parcela</label><input type="month" id="cfg-taxa-first" oninput="saveConfig()"></div>
+            <div class="form-group"><label>Mês-base INCC</label><input type="month" id="cfg-taxa-base" oninput="saveConfig()"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="incc-config-panel">
+      <div class="panel-header">
+        <span class="panel-title">Índices INCC Mensais (%)</span>
+        <span class="panel-meta">INCC-DI · Valores oficiais FGV · Tracejado = estimativa</span>
+      </div>
+      <div class="incc-config-grid" id="incc-fields"></div>
+      <div class="note">Atualize os índices estimados (tracejado) conforme a FGV divulgar. Os cálculos são atualizados automaticamente.</div>
     </div>
   </div>
 
 </div>
-
 <script>
-// ─── DATA MODEL ───────────────────────────────────────────────────────────────
-const CONFIGS = {
-  entrada: { label: 'Entrada', total: 52181.28, parcelas: 72, color: '#c8a96e' },
-  itbi:    { label: 'ITBI / Cartório', total: 8520.00, parcelas: 48, color: '#6e9ec8' },
-  taxa:    { label: 'Taxa Bancária', total: 750.00, parcelas: 12, color: '#6ec8a0' },
+// ═══ ESTADO ═══
+// Valores oficiais INCC-DI (FGV) — fonte: debit.com.br
+const INCC_KNOWN = {'2025-12':0.21,'2026-01':0.72,'2026-02':0.28,'2026-03':0.54,'2026-04':1.00,'2026-05':0.88};
+const EST_DEFAULT = 0.65;
+
+let state = loadState() || {
+  incc:{...INCC_KNOWN},
+  config:{
+    entrada:{valor:52181.28,n:72,first:'2026-02',base:'2025-12'},
+    itbi:   {valor:8520.00, n:48,first:'2026-02',base:'2025-12'},
+    taxa:   {valor:750.00,  n:12,first:'2026-02',base:'2025-12'},
+  },
+  parcelas:{entrada:[],itbi:[],taxa:[]}
 };
 
-const STORAGE_KEY = 'apt_gestao_v2';
+function saveState(){try{localStorage.setItem('apt_state2',JSON.stringify(state));}catch(e){}}
+function loadState(){try{const s=localStorage.getItem('apt_state2');return s?JSON.parse(s):null;}catch(e){return null;}}
 
-function loadData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return { entrada: [], itbi: [], taxa: [] };
+// ═══ UTILS ═══
+const fmt=(v,d=2)=>v.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fBRL=v=>'R$ '+fmt(v);
+const MESES=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+function addMonths(ym,n){
+  const[y,m]=ym.split('-').map(Number);
+  const d=new Date(y,m-1+n,1);
+  return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
 }
+function monthLabel(ym){const[y,m]=ym.split('-');return`${MESES[+m-1]}. ${y}`;}
+function vencLabel(ym){const[y,m]=ym.split('-');return`10/${m}/${y}`;}
+function getINCC(ym){return state.incc[ym]!==undefined?state.incc[ym]:EST_DEFAULT;}
 
-function saveData(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-let data = loadData();
-
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-const fmt = (v) => 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-const fmtN = (v) => v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
-const pct = (v) => (v * 100).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}) + '%';
-
-function getVencimento(parcela) {
-  // First parcela starts at next month from now — but we use stored data
-  // vencimento based on parcel number; base: let user see as recorded
-  return null;
-}
-
-function computeRows(key) {
-  const cfg = CONFIGS[key];
-  const rows = data[key].sort((a,b) => a.num - b.num);
-  let saldoDevedor = cfg.total;
-  const result = [];
-
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    const parcelasRestantes = cfg.parcelas - row.num + 1;
-    // Saldo devedor atualizado pelo índice
-    const saldoAtualizado = saldoDevedor * (1 + (row.incc || 0));
-    const parcelaAtualizada = saldoAtualizado / parcelasRestantes;
-    const diferenca = (row.boleto || 0) - parcelaAtualizada;
-    // Saldo Devedor Atualizado = Saldo Devedor − Boleto pago (valor efetivamente pago)
-    const saldoDevedorAtualizado = row.boleto !== undefined
-      ? saldoAtualizado - row.boleto
-      : saldoAtualizado - parcelaAtualizada; // fallback se boleto não informado
-
-    result.push({
-      ...row,
-      saldoDevedor: saldoAtualizado,
-      parcelaAtualizada,
-      diferenca,
-      saldoDevedorAtualizado,
-    });
-
-    saldoDevedor = saldoDevedorAtualizado;
+// ═══ CÁLCULO INCC ═══
+// 1ª parcela usa índice do mês-base, 2ª usa base+1, etc.
+function calcParcela(mod,numParcela){
+  const cfg=state.config[mod];
+  const parcOrig=cfg.valor/cfg.n;
+  let fator=1;
+  for(let i=0;i<numParcela;i++){
+    const mesIncc=addMonths(cfg.base,i);
+    fator*=(1+getINCC(mesIncc)/100);
   }
-  return { rows: result, saldoDevedorInicial: cfg.total };
+  return{parcOrig,parcCorrigida:parcOrig*fator,fator};
+}
+function getMesIndice(mod,num){return addMonths(state.config[mod].base,num-1);}
+function getMesVenc(mod,num){return addMonths(state.config[mod].first,num-1);}
+
+// ═══ TABS ═══
+function showTab(tab){
+  ['visao','entrada','itbi','taxa','incc'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('hidden',t!==tab));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['visao','entrada','itbi','taxa','incc'][i]===tab));
+  if(tab==='visao')renderOverview();
+  if(tab==='entrada')renderTab('entrada');
+  if(tab==='itbi')renderTab('itbi');
+  if(tab==='taxa')renderTab('taxa');
+  if(tab==='incc')renderInccConfig();
 }
 
-// ─── TABLE HEADERS ────────────────────────────────────────────────────────────
-function buildHeaders(tableEl) {
-  const thead = tableEl.querySelector('thead');
-  thead.innerHTML = `<tr>
-    <th>Nº</th>
-    <th>Vencimento</th>
-    <th>Mês Índice</th>
-    <th>Valor Parcela</th>
-    <th>Índice INCC</th>
-    <th>Parcela Atualizada</th>
-    <th>Boleto</th>
-    <th>Diferença</th>
-    <th>Saldo Devedor</th>
-    <th>Saldo Devedor Atualizado</th>
-    <th></th>
-  </tr>`;
-}
+// ═══ RENDER TAB ═══
+function renderTab(mod){
+  const parcelas=state.parcelas[mod];
+  const cfg=state.config[mod];
 
-// ─── RENDER TABLE ─────────────────────────────────────────────────────────────
-function renderTable(key) {
-  const cfg = CONFIGS[key];
-  const tableEl = document.getElementById('table-' + key);
-  buildHeaders(tableEl);
-  const tbody = tableEl.querySelector('tbody');
-  tbody.innerHTML = '';
+  // Última parcela corrigida lançada
+  const ultimaParc=parcelas.length>0?parcelas[parcelas.length-1]:null;
+  const ultimaAtual=ultimaParc?calcParcela(mod,ultimaParc.num).parcCorrigida:cfg.valor/cfg.n;
 
-  // Initial row
-  const initRow = document.createElement('tr');
-  initRow.style.background = 'rgba(200,169,110,0.05)';
-  initRow.innerHTML = `
-    <td style="color:var(--muted);font-size:0.75rem;">—</td>
-    <td style="text-align:left;color:var(--muted);font-size:0.75rem;">Saldo Inicial</td>
-    <td>—</td>
-    <td style="text-align:right;">—</td>
-    <td style="text-align:right;">—</td>
-    <td style="text-align:right;">—</td>
-    <td style="text-align:right;">—</td>
-    <td style="text-align:right;">—</td>
-    <td class="saldo-devedor" style="text-align:right;">${fmt(cfg.total)}</td>
-    <td class="saldo-atualizado" style="text-align:right;">${fmt(cfg.total)}</td>
-    <td></td>
-  `;
-  tbody.appendChild(initRow);
+  // Saldo devedor — método Canopus: parcelas restantes × última parcela corrigida conhecida
+  const restantes=cfg.n-parcelas.length;
+  const saldoAtual=restantes*ultimaAtual;
 
-  const { rows } = computeRows(key);
-
-  rows.forEach(row => {
-    const tr = document.createElement('tr');
-    const diffClass = row.diferenca > 0.005 ? 'diff-pos' : row.diferenca < -0.005 ? 'diff-neg' : 'diff-zero';
-    const diffSign = row.diferenca >= 0 ? '' : '-';
-
-    tr.innerHTML = `
-      <td>${row.num}</td>
-      <td style="text-align:left;">${row.vencimento}</td>
-      <td style="text-align:left;color:var(--muted);">${row.mesIndice || '—'}</td>
-      <td>${fmt(row.valorParcela)}</td>
-      <td>${row.incc ? pct(row.incc) : '—'}</td>
-      <td class="editable-cell" data-key="${key}" data-id="${row.id}" data-field="parcelaAtualizada">${fmt(row.parcelaAtualizada)}</td>
-      <td class="editable-cell" data-key="${key}" data-id="${row.id}" data-field="boleto">${row.boleto !== undefined ? fmt(row.boleto) : '—'}</td>
-      <td class="${diffClass}">${row.boleto !== undefined ? (diffSign + fmt(row.diferenca)) : '—'}</td>
-      <td class="saldo-devedor">${fmt(row.saldoDevedor)}</td>
-      <td class="saldo-atualizado">${fmt(row.saldoDevedorAtualizado)}</td>
-      <td><button class="btn-delete" onclick="deleteRow('${key}', '${row.id}')">✕</button></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  // Meta
-  document.getElementById('meta-' + key).textContent =
-    `${rows.length} parcelas lançadas de ${cfg.parcelas} · Restam ${cfg.parcelas - rows.length}`;
-
-  // Summary cards
-  renderSummary(key, rows);
-}
-
-// ─── EDITABLE BOLETO CELL ─────────────────────────────────────────────────────
-document.addEventListener('click', function(e) {
-  const cell = e.target.closest('.editable-cell[data-field="boleto"]');
-  if (!cell || cell.querySelector('input')) return;
-  const key = cell.dataset.key, id = cell.dataset.id;
-  const row = data[key].find(r => r.id === id);
-  const currentVal = row.boleto !== undefined ? row.boleto.toFixed(2) : '';
-  cell.innerHTML = `<input type="number" step="0.01" value="${currentVal}" placeholder="0,00">`;
-  const inp = cell.querySelector('input');
-  inp.focus();
-  inp.select();
-  const commit = () => {
-    const val = parseFloat(inp.value.replace(',','.'));
-    if (!isNaN(val)) row.boleto = val;
-    else delete row.boleto;
-    saveData(data);
-    renderAll(key);
-  };
-  inp.addEventListener('blur', commit);
-  inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); if (e.key === 'Escape') { renderAll(key); } });
-});
-
-// ─── SUMMARY ──────────────────────────────────────────────────────────────────
-function renderSummary(key, rows) {
-  const cfg = CONFIGS[key];
-  const el = document.getElementById('summary-' + key);
-  const lastRow = rows[rows.length - 1];
-  const saldoAtual = lastRow ? lastRow.saldoDevedorAtualizado : cfg.total;
-  const pago = rows.length;
-  const restam = cfg.parcelas - pago;
-
-  el.innerHTML = `
+  // Cards
+  document.getElementById('cards-'+mod).innerHTML=`
     <div class="summary-card">
       <div class="card-label">Saldo Devedor Atual</div>
-      <div class="card-value">${fmt(saldoAtual)}</div>
-      <div class="card-sub">Após ${pago} parcelas pagas</div>
+      <div class="card-value">${fBRL(Math.max(0,saldoAtual))}</div>
+      <div class="card-sub">Após ${parcelas.length} parcelas pagas</div>
     </div>
     <div class="summary-card">
       <div class="card-label">Parcelas Restantes</div>
-      <div class="card-value" style="color:var(--blue);">${restam}x</div>
-      <div class="card-sub">de ${cfg.parcelas} total</div>
+      <div class="card-value" style="color:var(--blue)">${cfg.n-parcelas.length}x</div>
+      <div class="card-sub">de ${cfg.n} total</div>
     </div>
     <div class="summary-card">
       <div class="card-label">Valor Original</div>
-      <div class="card-value" style="color:var(--muted);font-size:1.1rem;">${fmt(cfg.total)}</div>
+      <div class="card-value">${fBRL(cfg.valor)}</div>
       <div class="card-sub">sem correção</div>
     </div>
-    ${lastRow ? `
     <div class="summary-card">
       <div class="card-label">Última Parcela Atualizada</div>
-      <div class="card-value" style="font-size:1.1rem;">${fmt(lastRow.parcelaAtualizada)}</div>
-      <div class="card-sub">Parc. ${lastRow.num} · ${lastRow.vencimento}</div>
-    </div>` : ''}
-  `;
-}
+      <div class="card-value">${ultimaParc?fBRL(ultimaAtual):'—'}</div>
+      <div class="card-sub">${ultimaParc?`Parc. ${ultimaParc.num} · ${vencLabel(getMesVenc(mod,ultimaParc.num))}`:'Nenhuma lançada'}</div>
+    </div>`;
 
-// ─── ADD ROW FORM ─────────────────────────────────────────────────────────────
-const MESES = ['Jan.','Fev.','Mar.','Abr.','Mai.','Jun.','Jul.','Ago.','Set.','Out.','Nov.','Dez.'];
-const ANOS = ['2025','2026','2027','2028','2029','2030'];
+  document.getElementById('meta-'+mod).textContent=`${parcelas.length} parcelas lançadas de ${cfg.n} · Restam ${cfg.n-parcelas.length}`;
 
-function buildForm(key) {
-  const cfg = CONFIGS[key];
-  const el = document.getElementById('form-' + key);
-  
-  const mesesOptions = ANOS.flatMap(a => MESES.map(m => `<option>${m} ${a}</option>`)).join('');
+  // Popular select
+  const selId=mod==='entrada'?'ent-mes':mod==='itbi'?'itbi-mes':'taxa-mes';
+  const inccId=mod==='entrada'?'ent-incc':mod==='itbi'?'itbi-incc':'taxa-incc';
+  const selEl=document.getElementById(selId);
+  const nextNum=parcelas.length+1;
+  selEl.innerHTML='<option value="">Selecione</option>';
+  for(let i=1;i<=cfg.n;i++){
+    const ym=addMonths(cfg.base,i-1);
+    const est=!INCC_KNOWN[ym]?' ★':'';
+    const opt=document.createElement('option');
+    opt.value=ym;opt.textContent=monthLabel(ym)+est;
+    if(i===nextNum)opt.selected=true;
+    selEl.appendChild(opt);
+  }
+  selEl.oninput=()=>{document.getElementById(inccId).value=fmt(getINCC(selEl.value));};
+  if(selEl.value)document.getElementById(inccId).value=fmt(getINCC(selEl.value));
 
-  el.innerHTML = `
-    <div class="form-group">
-      <label>Nº Parcela</label>
-      <input type="number" id="fn-${key}" min="1" max="${cfg.parcelas}" placeholder="1">
-    </div>
-    <div class="form-group">
-      <label>Mês Índice INCC</label>
-      <select id="fmi-${key}"><option value="">Selecione</option>${mesesOptions}</select>
-    </div>
-    <div class="form-group">
-      <label>Índice INCC (%)</label>
-      <input type="number" id="fi-${key}" step="0.01" placeholder="0,21">
-    </div>
-    <div class="form-group">
-      <label>Boleto (R$)</label>
-      <input type="number" id="fb-${key}" step="0.01" placeholder="opcional">
-    </div>
-    <button class="btn-add" onclick="addRow('${key}')">+ Adicionar Parcela</button>
-  `;
-}
+  // Tabela
+  const tbody=document.getElementById('tbody-'+mod);
+  tbody.innerHTML='';
+  const tr0=document.createElement('tr');
+  tr0.innerHTML=`<td>—</td><td>Saldo Inicial</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="saldo-devedor">${fBRL(cfg.valor)}</td><td class="saldo-atualizado">${fBRL(cfg.valor)}</td><td></td>`;
+  tbody.appendChild(tr0);
 
-function getVencimentoStr(num) {
-  // parcela 1 = 10/02/2026 (as per the example), incremented monthly
-  const base = new Date(2026, 1, 10); // Feb 10 2026
-  base.setMonth(base.getMonth() + (num - 1));
-  const d = String(base.getDate()).padStart(2,'0');
-  const m = String(base.getMonth()+1).padStart(2,'0');
-  const y = base.getFullYear();
-  return `${d}/${m}/${y}`;
-}
+  let saldoDev=cfg.valor,saldoDevAtual=cfg.valor;
+  let totOrig=0,totAtual=0,totBoletos=0;
 
-function addRow(key) {
-  const cfg = CONFIGS[key];
-  const num = parseInt(document.getElementById('fn-' + key).value);
-  const mesIndice = document.getElementById('fmi-' + key).value;
-  const inccPct = parseFloat(document.getElementById('fi-' + key).value);
-  const boletoVal = document.getElementById('fb-' + key).value;
+  parcelas.forEach((p,idx)=>{
+    const mesVenc=getMesVenc(mod,p.num);
+    const mesIdx=getMesIndice(mod,p.num);
+    const{parcOrig,parcCorrigida}=calcParcela(mod,p.num);
+    const taxa=getINCC(mesIdx);
+    const est=!INCC_KNOWN[mesIdx];
+    const boleto=p.boleto!=null?p.boleto:null;
+    const diff=boleto!=null?boleto-parcCorrigida:null;
 
-  if (!num || num < 1 || num > cfg.parcelas) { alert('Informe um número de parcela válido (1–' + cfg.parcelas + ')'); return; }
-  if (data[key].find(r => r.num === num)) { alert('Parcela ' + num + ' já cadastrada!'); return; }
+    saldoDev-=parcOrig;
+    // Saldo atualizado linha a linha: subtrai boleto se existe, senão parcela corrigida
+    saldoDevAtual-=(boleto!=null?boleto:parcCorrigida);
+    totOrig+=parcOrig;totAtual+=parcCorrigida;totBoletos+=boleto||0;
 
-  // valorParcela = saldo original / parcelas total (sem correção, base)
-  const valorParcela = cfg.total / cfg.parcelas;
+    const dc=diff===null?'diff-zero':diff>0.005?'diff-pos':diff<-0.005?'diff-neg':'diff-zero';
+    const ds=diff===null?'—':(diff>=0?'+':'')+fBRL(diff);
 
-  const row = {
-    id: Date.now().toString(),
-    num,
-    vencimento: getVencimentoStr(num),
-    mesIndice: mesIndice || '',
-    incc: isNaN(inccPct) ? 0 : inccPct / 100,
-    valorParcela,
-  };
-  if (boletoVal) row.boleto = parseFloat(boletoVal);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td>${p.num}</td>
+      <td>${vencLabel(mesVenc)}</td>
+      <td>${monthLabel(mesIdx)}${est?' <span class="est-tag">★</span>':''}</td>
+      <td>${fBRL(parcOrig)}</td>
+      <td>${fmt(taxa)}%${est?' <span class="est-tag">★</span>':''}</td>
+      <td>${fBRL(parcCorrigida)}</td>
+      <td class="editable-cell" data-idx="${idx}">${boleto!=null?fBRL(boleto):'<span style="color:var(--muted)">—</span>'}</td>
+      <td class="${dc}">${ds}</td>
+      <td class="saldo-devedor">${fBRL(Math.max(0,saldoDev))}</td>
+      <td class="saldo-atualizado">${fBRL(Math.max(0,saldoDevAtual))}</td>
+      <td><button class="btn-delete" onclick="removeParcela('${mod}',${idx})">×</button></td>`;
 
-  data[key].push(row);
-  saveData(data);
-  renderAll(key);
-
-  // Clear
-  document.getElementById('fn-' + key).value = '';
-  document.getElementById('fmi-' + key).value = '';
-  document.getElementById('fi-' + key).value = '';
-  document.getElementById('fb-' + key).value = '';
-}
-
-function deleteRow(key, id) {
-  if (!confirm('Remover esta parcela?')) return;
-  data[key] = data[key].filter(r => r.id !== id);
-  saveData(data);
-  renderAll(key);
-}
-
-// ─── VISÃO GERAL ──────────────────────────────────────────────────────────────
-function renderOverview() {
-  // Summary cards
-  const el = document.getElementById('summary-cards');
-  let totalDevedor = 0;
-  let totalPago = 0;
-
-  Object.keys(CONFIGS).forEach(key => {
-    const cfg = CONFIGS[key];
-    const { rows } = computeRows(key);
-    const last = rows[rows.length - 1];
-    const saldo = last ? last.saldoDevedorAtualizado : cfg.total;
-    totalDevedor += saldo;
-    rows.forEach(r => { if (r.boleto) totalPago += r.boleto; });
+    tr.querySelector('.editable-cell').addEventListener('click',function(){
+      if(this.querySelector('input'))return;
+      const cur=state.parcelas[mod][idx].boleto;
+      const inp=document.createElement('input');
+      inp.type='number';inp.step='0.01';
+      inp.value=cur!=null?cur:'';
+      this.innerHTML='';this.appendChild(inp);inp.focus();
+      inp.addEventListener('blur',()=>{
+        state.parcelas[mod][idx].boleto=inp.value!==''?parseFloat(inp.value):null;
+        saveState();renderTab(mod);
+      });
+      inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur();});
+    });
+    tbody.appendChild(tr);
   });
 
-  el.innerHTML = `
-    <div class="summary-card" style="border-color:var(--accent);">
+  // Tfoot
+  document.getElementById('tfoot-'+mod).innerHTML=`
+    <td>Totais</td><td colspan="2"></td>
+    <td>${fBRL(totOrig)}</td><td></td>
+    <td>${fBRL(totAtual)}</td>
+    <td>${fBRL(totBoletos)}</td>
+    <td class="${totBoletos>0?(totBoletos-totAtual>=0?'diff-pos':'diff-neg'):'diff-zero'}">${totBoletos>0?((totBoletos-totAtual>=0?'+':'')+fBRL(totBoletos-totAtual)):'—'}</td>
+    <td class="saldo-devedor">${fBRL(Math.max(0,saldoDev))}</td>
+    <td class="saldo-atualizado">${fBRL(Math.max(0,saldoAtual))}</td>
+    <td></td>`;
+}
+
+// ═══ ADICIONAR PARCELA ═══
+function addParcela(mod){
+  const selId=mod==='entrada'?'ent-mes':mod==='itbi'?'itbi-mes':'taxa-mes';
+  const boletoId=mod==='entrada'?'ent-boleto':mod==='itbi'?'itbi-boleto':'taxa-boleto';
+  const numId=mod==='entrada'?'ent-num':mod==='itbi'?'itbi-num':'taxa-num';
+
+  const mesIncc=document.getElementById(selId).value;
+  if(!mesIncc){alert('Selecione o mês do índice INCC.');return;}
+
+  const numManual=parseInt(document.getElementById(numId).value);
+  const num=numManual||(state.parcelas[mod].length+1);
+  const bv=document.getElementById(boletoId).value;
+  const boleto=bv!==''?parseFloat(bv):null;
+
+  if(state.parcelas[mod].find(p=>p.num===num)){
+    if(!confirm(`Parcela ${num} já existe. Substituir?`))return;
+    state.parcelas[mod]=state.parcelas[mod].filter(p=>p.num!==num);
+  }
+  state.parcelas[mod].push({num,mesIncc,boleto});
+  state.parcelas[mod].sort((a,b)=>a.num-b.num);
+  document.getElementById(boletoId).value='';
+  document.getElementById(numId).value='';
+  saveState();renderTab(mod);
+}
+
+function removeParcela(mod,idx){
+  state.parcelas[mod].splice(idx,1);
+  saveState();renderTab(mod);
+}
+
+// ═══ OVERVIEW ═══
+function renderOverview(){
+  const mods=['entrada','itbi','taxa'];
+  const labels={entrada:'Entrada',itbi:'ITBI / Cartório',taxa:'Taxa Bancária'};
+  const dots={entrada:'#c8a96e',itbi:'#6e9ec8',taxa:'#6ec8a0'};
+  let totalSaldo=0,totalPago=0,totalValor=0;
+  const md={};
+
+  mods.forEach(mod=>{
+    const cfg=state.config[mod];
+    const parcelas=state.parcelas[mod];
+    let totalBoletos=0;
+    parcelas.forEach(p=>{ totalBoletos+=p.boleto||0; });
+    const _ultimaP=parcelas.length>0?parcelas[parcelas.length-1]:null;
+    const _ultimaV=_ultimaP?calcParcela(mod,_ultimaP.num).parcCorrigida:cfg.valor/cfg.n;
+    const saldoAtual=(cfg.n-parcelas.length)*_ultimaV;
+    const up=parcelas.length>0?parcelas[parcelas.length-1]:null;
+    const ua=up?calcParcela(mod,up.num).parcCorrigida:0;
+    md[mod]={saldoAtual:Math.max(0,saldoAtual),totalBoletos,ultimaAtual:ua,cfg,parcelas};
+    totalSaldo+=Math.max(0,saldoAtual);totalPago+=totalBoletos;totalValor+=cfg.valor;
+  });
+
+  document.getElementById('overview-cards').innerHTML=`
+    <div class="summary-card">
       <div class="card-label">Saldo Total Devedor</div>
-      <div class="card-value">${fmt(totalDevedor)}</div>
+      <div class="card-value">${fBRL(totalSaldo)}</div>
       <div class="card-sub">Todas as modalidades</div>
     </div>
     <div class="summary-card">
       <div class="card-label">Total Pago (Boletos)</div>
-      <div class="card-value" style="color:var(--success);">${fmt(totalPago)}</div>
+      <div class="card-value" style="color:var(--success)">${fBRL(totalPago)}</div>
       <div class="card-sub">Soma de boletos lançados</div>
     </div>
     <div class="summary-card">
       <div class="card-label">Valor Total do Imóvel</div>
-      <div class="card-value" style="color:var(--muted);font-size:1.1rem;">${fmt(52181.28 + 8520 + 750)}</div>
+      <div class="card-value">${fBRL(totalValor)}</div>
       <div class="card-sub">Entrada + ITBI + Taxa</div>
-    </div>
-  `;
+    </div>`;
 
-  // Mini cards per category
-  const og = document.getElementById('overview-grid');
-  og.innerHTML = '';
-
-  Object.keys(CONFIGS).forEach(key => {
-    const cfg = CONFIGS[key];
-    const { rows } = computeRows(key);
-    const last = rows[rows.length - 1];
-    const saldo = last ? last.saldoDevedorAtualizado : cfg.total;
-    const pago = rows.length;
-    const restam = cfg.parcelas - pago;
-    const ultimaParc = last ? fmt(last.parcelaAtualizada) : '—';
-
-    const card = document.createElement('div');
-    card.className = 'mini-table-card';
-    card.innerHTML = `
-      <div class="mini-header">
-        <div class="mini-dot" style="background:${cfg.color}"></div>
-        <h3>${cfg.label}</h3>
-      </div>
-      <div class="mini-row"><span>Saldo Devedor</span><span>${fmt(saldo)}</span></div>
-      <div class="mini-row"><span>Parcelas Pagas</span><span>${pago} de ${cfg.parcelas}</span></div>
-      <div class="mini-row"><span>Parcelas Restantes</span><span>${restam}x</span></div>
-      <div class="mini-row"><span>Última Parcela Atualizada</span><span>${ultimaParc}</span></div>
-      <div class="mini-row"><span>Valor Original</span><span>${fmt(cfg.total)}</span></div>
-    `;
-    og.appendChild(card);
+  const mini=document.getElementById('overview-mini');
+  mini.innerHTML='';
+  mods.forEach(mod=>{
+    const d=md[mod];
+    const div=document.createElement('div');
+    div.className='mini-table-card';
+    div.innerHTML=`
+      <div class="mini-header"><span class="mini-dot" style="background:${dots[mod]}"></span><h3>${labels[mod]}</h3></div>
+      <div class="mini-row"><span>Saldo Devedor</span><span>${fBRL(d.saldoAtual)}</span></div>
+      <div class="mini-row"><span>Parcelas Pagas</span><span>${d.parcelas.length} de ${d.cfg.n}</span></div>
+      <div class="mini-row"><span>Parcelas Restantes</span><span>${d.cfg.n-d.parcelas.length}x</span></div>
+      <div class="mini-row"><span>Última Parcela Atualizada</span><span>${d.ultimaAtual>0?fBRL(d.ultimaAtual):'—'}</span></div>
+      <div class="mini-row"><span>Valor Original</span><span>${fBRL(d.cfg.valor)}</span></div>`;
+    mini.appendChild(div);
   });
 }
 
-// ─── TABS ────────────────────────────────────────────────────────────────────
-function showTab(name) {
-  ['visao-geral','entrada','itbi','taxa'].forEach(t => {
-    document.getElementById('tab-' + t).classList.add('hidden');
+// ═══ CONFIG ═══
+function renderInccConfig(){
+  ['entrada','itbi','taxa'].forEach(mod=>{
+    const cfg=state.config[mod];
+    const p=mod==='entrada'?'cfg-ent':mod==='itbi'?'cfg-itbi':'cfg-taxa';
+    document.getElementById(p+'-valor').value=cfg.valor;
+    document.getElementById(p+'-n').value=cfg.n;
+    document.getElementById(p+'-first').value=cfg.first;
+    document.getElementById(p+'-base').value=cfg.base;
   });
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-' + name).classList.remove('hidden');
-  event.target.classList.add('active');
-  if (name === 'visao-geral') renderOverview();
+  const allMonths=new Set();
+  ['entrada','itbi','taxa'].forEach(mod=>{
+    const cfg=state.config[mod];
+    for(let i=0;i<=cfg.n;i++)allMonths.add(addMonths(cfg.base,i));
+  });
+  Object.keys(INCC_KNOWN).forEach(ym=>allMonths.add(ym));
+  const sorted=[...allMonths].sort();
+  const grid=document.getElementById('incc-fields');
+  grid.innerHTML='';
+  sorted.forEach(ym=>{
+    const known=!!INCC_KNOWN[ym];
+    const val=state.incc[ym]!==undefined?state.incc[ym]:EST_DEFAULT;
+    const div=document.createElement('div');
+    div.className='incc-field'+(known?'':' est');
+    div.innerHTML=`<label>${monthLabel(ym)}${known?'':' ★'}</label><input type="number" step="0.01" value="${val.toFixed(2)}" data-ym="${ym}">`;
+    div.querySelector('input').addEventListener('input',e=>{state.incc[ym]=parseFloat(e.target.value)||0;saveState();});
+    grid.appendChild(div);
+  });
 }
 
-function renderAll(key) {
-  renderTable(key);
-  renderOverview();
+function saveConfig(){
+  ['entrada','itbi','taxa'].forEach(mod=>{
+    const p=mod==='entrada'?'cfg-ent':mod==='itbi'?'cfg-itbi':'cfg-taxa';
+    state.config[mod].valor=parseFloat(document.getElementById(p+'-valor').value)||0;
+    state.config[mod].n=parseInt(document.getElementById(p+'-n').value)||1;
+    state.config[mod].first=document.getElementById(p+'-first').value;
+    state.config[mod].base=document.getElementById(p+'-base').value;
+  });
+  saveState();
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-document.getElementById('currentDate').textContent = new Date().toLocaleDateString('pt-BR', {
-  weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-});
-
-['entrada','itbi','taxa'].forEach(key => {
-  buildForm(key);
-  renderTable(key);
-});
+// ═══ INIT ═══
+function setDate(){
+  const now=new Date();
+  const dias=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+  const meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  document.getElementById('dataHoje').textContent=`${dias[now.getDay()]}, ${now.getDate()} de ${meses[now.getMonth()]} de ${now.getFullYear()}`;
+}
+setDate();
 renderOverview();
 </script>
 </body>
